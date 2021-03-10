@@ -125,11 +125,12 @@ function getOldRecords(zone, host, ipv4, ipv6) {
         .then(data => {
             var oldRecord = data[0];
             if (oldRecord.length < 1) {
-                throw {
-                    code: 400,
-                    title: 'illegal host',
-                    message: 'Host "' + host + '" not found.'
-                };
+                console.log('Host "' + host + '" not found. Creating new record');
+                // throw {
+                //     code: 400,
+                //     title: 'illegal host',
+                //     message: 'Host "' + host + '" not found.'
+                // };
             }
             return oldRecord;
         });
@@ -143,27 +144,53 @@ function updateRecords(zone, host, ipv4, ipv6) {
         typeof ipv6 != 'undefined'
     ).then(oldRecords => {
         let newRecords = [];
-        if (ipv4) {
-            newRecords.push(
-                zone.record('A', {
-                    name: host,
-                    ttl: settings.ttl,
-                    data: ipv4
-                })
-            );
+        if (oldRecords.length < 1){
+            // creating new record
+            if (ipv4) {
+                newRecords.push(
+                    zone.record('A', {
+                        name: host,
+                        ttl: settings.ttl,
+                        data: ipv4
+                    })
+                );
+            }
+            if (ipv6) {
+                newRecords.push(
+                    zone.record('AAAA', {
+                        name: host,
+                        ttl: settings.ttl,
+                        data: ipv6
+                    })
+                );
+            }
+            return zone.addRecords(newRecords);
         }
-        if (ipv6) {
-            newRecords.push(
-                zone.record('AAAA', {
-                    name: host,
-                    ttl: settings.ttl,
-                    data: ipv6
-                })
-            );
+        else {
+            // updating existing record
+            if (ipv4) {
+                newRecords.push(
+                    zone.record('A', {
+                        name: host,
+                        ttl: settings.ttl,
+                        data: ipv4
+                    })
+                );
+            }
+            if (ipv6) {
+                newRecords.push(
+                    zone.record('AAAA', {
+                        name: host,
+                        ttl: settings.ttl,
+                        data: ipv6
+                    })
+                );
+            }
+            return zone.createChange({
+                add: newRecords,
+                delete: oldRecords
+            });
         }
-        return zone.createChange({
-            add: newRecords,
-            delete: oldRecords
-        });
     });
 }
+      

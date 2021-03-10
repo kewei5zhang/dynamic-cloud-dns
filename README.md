@@ -16,6 +16,15 @@ curl https://us-central1-<project-name>.cloudfunctions.net/updateHost \
 ```
 If neither an IPv4 nor an IPv6 address is provided, the source address of the request is used.
 
+Test payload
+```
+{ 
+    "token": "<secretToken>",
+    "host": "test.example.com",
+    "ipv4": "192.168.1.1"
+}
+```
+
 ## Configuration
 
 Settings are stored in `settings.json`
